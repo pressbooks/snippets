@@ -2,7 +2,9 @@ First, Install dependencies. See Part 3 of https://docs.pressbooks.org/installat
 
 Next, get [WP-CLI][1].
 
-Once WP-CLI is installed on your server, the following shell commands executed in the site root will download and install a fresh version of Pressbooks. Obviously you need to put in the correct information for your server and install on lines 2 and 10, and enter the correct paths to `WP_PRINCE_COMMAND`, `PB_KINDLEGEN_COMMAND`, `PB_EPUBCHECK_COMMAND` and `PB_XMLLINT_COMMAND` where indicated.
+Once WP-CLI is installed on your server, the following shell commands executed in the site root will download and install a fresh version of Pressbooks. 
+
+> TIP: You copy/pasted and it didn't work as is? Of course not! You need to put in the correct information for your server..
 
     wp core download
     wp core config --dbname="dbname" --dbuser="dbuser" --dbpass="dbpass" --extra-php &lt;&lt;PHP
@@ -13,6 +15,7 @@ Once WP-CLI is installed on your server, the following shell commands executed i
     define( 'PB_EPUBCHECK_COMMAND', '/usr/bin/java -jar /opt/epubcheck/epubcheck.jar' );
     define( 'PB_XMLLINT_COMMAND', '/usr/bin/xmllint' );
     define( 'PB_SAXON_COMMAND', '/usr/bin/java -jar /opt/saxon-he/saxon-he.jar' );
+    define( 'PB_MATHJAX_URL', 'http://localhost:3000/' );
     PHP
     wp core multisite-install --url='http://domain.com' --title='Pressbooks' --admin_user='username' --admin_password='password' --admin_email='user@domain.com'
     wp plugin delete hello
