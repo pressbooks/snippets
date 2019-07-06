@@ -1,6 +1,6 @@
-Install dependencies. See Part 3: https://docs.pressbooks.org/installation/
+First, Install dependencies. See Part 3 of https://docs.pressbooks.org/installation/
 
-Get [WP-CLI][1].
+Next, get [WP-CLI][1].
 
 Once WP-CLI is installed on your server, the following shell commands executed in the site root will download and install a fresh version of Pressbooks. Obviously you need to put in the correct information for your server and install on lines 2 and 10, and enter the correct paths to `WP_PRINCE_COMMAND`, `PB_KINDLEGEN_COMMAND`, `PB_EPUBCHECK_COMMAND` and `PB_XMLLINT_COMMAND` where indicated.
 
