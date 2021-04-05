@@ -1,0 +1,57 @@
+name: pipeline workflow
+on:
+  push:
+    branches: [ dev, master ]
+  pull_request:
+    branches: [ dev ]
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        php: [ 7.3 ]
+        os: [ ubuntu-18.04 ]
+        wordpress: [ 5.6.2 ]
+
+    name: Test - PHP ${{ matrix.php }}
+
+    env:
+      WP_VERSION: ${{ matrix.wordpress }}
+      WP_MULTISITE: 0
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install OS dependencies
+        run: sudo apt-get install libxml2-utils ghostscript poppler-utils
+
+      - name: Start required services
+        run: sudo systemctl start mysql.service
+
+      - name: Cache PHP dependencies
+        uses: actions/cache@v1
+        with:
+          path: vendor
+          key: dependencies-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.lock') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: phpcs, composer:v1
+
+      - name: Install dependencies
+        run: |
+             export PATH="$HOME/.composer/vendor/bin:$PATH"
+             composer install --no-interaction
+             composer global require "phpunit/phpunit:7.5.20"
+
+      - name: Install WP tests
+        run: bash bin/install-wp-tests.sh wordpress_test root root localhost ${{ matrix.wordpress }}
+
+      - name: Run Lint
+        run: composer standards
+
+      - name: Run tests
+        run: phpunit
