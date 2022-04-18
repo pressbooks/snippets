@@ -26,7 +26,6 @@ Once WP-CLI is installed on your server, the following shell commands executed i
     wp theme install https://pressbooks.org/download/mcluhan/
     wp theme install https://pressbooks.org/download/aldine/
     wp theme install https://github.com/pressbooks/pressbooks-jacobs/archive/master.zip
-    wp theme install https://github.com/pressbooks/pressbooks-austenclassic/archive/master.zip
     wp theme install https://github.com/pressbooks/pressbooks-clarke/archive/master.zip
     wp theme install https://github.com/pressbooks/pressbooks-donham/archive/master.zip
     wp theme install https://github.com/pressbooks/pressbooks-fitzgerald/archive/master.zip
@@ -35,4 +34,3 @@ Once WP-CLI is installed on your server, the following shell commands executed i
     wp theme enable pressbooks-clarke --network
     wp theme enable pressbooks-donham --network
     wp theme enable pressbooks-fitzgerald --network
-    wp theme enable pressbooks-austenclassic --network
