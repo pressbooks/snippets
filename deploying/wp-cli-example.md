@@ -1,6 +1,6 @@
-First, Install dependencies. See Part 3 of https://docs.pressbooks.org/installation/
+First, Install dependencies. See Part 3 of https://pressbooks.org/docs/installation/
 
-Next, get [WP-CLI][1].
+Next, get [WP-CLI](https://wp-cli.org/).
 
 Once WP-CLI is installed on your server, the following shell commands executed in the site root will download and install a fresh version of Pressbooks. 
 
@@ -36,6 +36,3 @@ Once WP-CLI is installed on your server, the following shell commands executed i
     wp theme enable pressbooks-donham --network
     wp theme enable pressbooks-fitzgerald --network
     wp theme enable pressbooks-austenclassic --network
-
-
- [1]: https://wp-cli.org/
