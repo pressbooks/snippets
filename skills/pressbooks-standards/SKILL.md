@@ -52,8 +52,8 @@ Check GitHub Actions:
 **If missing, ask the user then generate from templates below.**
 
 Ask:
-1. `requires_pressbooks` — Does this plugin require Pressbooks core? (default: true)
-2. `use_mariadb` — Use MariaDB for tests? (default: true)
+1. `requires_pressbooks` — Does this plugin require Pressbooks core to run?
+2. `use_mariadb` — Use MariaDB for tests?
 
 ### Step 3: Audit composer.json
 
