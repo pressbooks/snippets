@@ -44,6 +44,13 @@ Check for legacy patterns:
 
 **If legacy patterns found, offer migration via `migrate-to-psr4` skill.**
 
+Check GitHub Actions:
+
+- `.github/workflows/tests.yml`
+- `.github/dependabot.yml`
+
+**If missing, generate from templates below.**
+
 ### Step 3: Audit composer.json
 
 Required dev dependencies:
@@ -239,6 +246,10 @@ class SanityTest extends TestCase
 
 ```
 plugin-name/
+├── .github/
+│   ├── workflows/
+│   │   └── tests.yml
+│   └── dependabot.yml
 ├── plugin-name.php          # Main plugin file
 ├── composer.json
 ├── pint.json
@@ -260,6 +271,88 @@ plugin-name/
 │   ├── TestCase.php
 │   └── Unit/
 └── vendor/                  # gitignored
+```
+
+---
+
+## Reference: GitHub Actions
+
+### .github/workflows/tests.yml
+
+```yaml
+name: Run Tests 🧪
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - '**/*.php'
+      - '**/*.js'
+      - '**/*.css'
+      - '**/*.json'
+      - '**/*.yml'
+      - 'composer.lock'
+      - 'composer.json'
+      - '!languages/**'
+      - '!docs/**'
+      - '!**/*.md'
+  pull_request:
+    branches:
+      - dev
+    paths:
+      - '**/*.php'
+      - '**/*.js'
+      - '**/*.css'
+      - '**/*.json'
+      - '**/*.yml'
+      - 'composer.lock'
+      - 'composer.json'
+      - '!languages/**'
+      - '!docs/**'
+      - '!**/*.md'
+  workflow_dispatch:
+
+jobs:
+  plugin-tests:
+    uses: pressbooks/reusable-workflows/.github/workflows/pb-plugin-tests.yml@main
+    secrets: inherit
+    with:
+      requires_pressbooks: true
+      use_mariadb: true
+```
+
+### .github/dependabot.yml
+
+```yaml
+version: 2
+updates:
+  - package-ecosystem: "composer"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-type: "direct"
+    open-pull-requests-limit: 5
+    versioning-strategy: "increase-if-necessary"
+    ignore:
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-major" ]
+    groups:
+      composer-dependencies:
+        dependency-type: "production"
+      composer-dev-dependencies:
+        dependency-type: "development"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      all-github-actions:
+        patterns:
+          - ".*"
 ```
 
 ---
