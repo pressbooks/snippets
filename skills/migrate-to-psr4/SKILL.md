@@ -45,9 +45,9 @@ Determine the new namespace structure based on plugin name.
 4. Update class names (remove underscores)
 5. Update composer.json autoload
 6. Update main plugin file imports
-7. Run `composer dump-autoload`
-8. Run `pint` to fix style
-9. Run tests
+7. Run `lando composer dump-autoload`
+8. Run `lando composer standards` to lint
+9. Run `lando composer test` to run tests
 10. Delete old `inc/` directory
 
 ## Reference: Before/After Examples
@@ -163,17 +163,16 @@ add_action('plugins_loaded', [PluginsConfig::class, 'init']);
 - [ ] Remove HM Autoloader dependency if present
 - [ ] Remove `register_class_path()` calls from main plugin file
 - [ ] Update main plugin file imports
-- [ ] Run `composer dump-autoload`
-- [ ] Run `./vendor/bin/pint`
-- [ ] Run `./vendor/bin/phpstan analyse`
-- [ ] Run tests to verify nothing broke
+- [ ] Run `lando composer dump-autoload`
+- [ ] Run `lando composer standards` to lint
+- [ ] Run `lando composer test` to verify nothing broke
 - [ ] Delete old `inc/` directory
 - [ ] Commit changes
 
 ## Important rules
 
-- Never skip running `composer dump-autoload` after namespace changes
-- Always run `pint` after migration to ensure PSR-12 compliance
+- Never skip running `lando composer dump-autoload` after namespace changes
+- Always run `lando composer standards` for lint, `lando composer test` for tests
 - Update all references to old class names (search for old namespace)
 - Test thoroughly before deleting old `inc/` directory
 - If plugin has tests, update test namespaces too

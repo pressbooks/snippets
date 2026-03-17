@@ -74,8 +74,8 @@ Required scripts:
 ### Step 4: Run audit (if vendor/ exists)
 
 ```bash
-./vendor/bin/pint --test
-./vendor/bin/phpunit --configuration phpunit.xml
+lando composer standards
+lando composer test
 ```
 
 ### Step 5: Report findings
@@ -89,7 +89,7 @@ Required scripts:
 
 ### Step 6: Fix
 
-Generate missing configs from templates, create `tests/` directory with required files, update composer.json, run `pint` if user confirms.
+Generate missing configs from templates, create `tests/` directory with required files, update composer.json, run `lando composer fix` if user confirms.
 
 ---
 
