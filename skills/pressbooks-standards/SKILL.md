@@ -49,7 +49,11 @@ Check GitHub Actions:
 - `.github/workflows/tests.yml`
 - `.github/dependabot.yml`
 
-**If missing, generate from templates below.**
+**If missing, ask the user then generate from templates below.**
+
+Ask:
+1. `requires_pressbooks` — Does this plugin require Pressbooks core? (default: true)
+2. `use_mariadb` — Use MariaDB for tests? (default: true)
 
 ### Step 3: Audit composer.json
 
@@ -318,8 +322,8 @@ jobs:
     uses: pressbooks/reusable-workflows/.github/workflows/pb-plugin-tests.yml@main
     secrets: inherit
     with:
-      requires_pressbooks: true
-      use_mariadb: true
+      requires_pressbooks: <requires_pressbooks>
+      use_mariadb: <use_mariadb>
 ```
 
 ### .github/dependabot.yml
