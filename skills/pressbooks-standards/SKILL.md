@@ -35,6 +35,10 @@ Check `tests/` directory:
 - `tests/TestCase.php`
 - `tests/Unit/SanityTest.php` (at minimum)
 
+Check `bin/` directory:
+
+- `bin/install-wp-tests.sh` (required by reusable workflow)
+
 Check for legacy patterns:
 
 - `inc/` directory (instead of `src/`)
@@ -244,6 +248,15 @@ class SanityTest extends TestCase
 }
 ```
 
+### bin/install-wp-tests.sh
+
+Required by the reusable workflow for CI tests. Download from:
+
+```bash
+curl -sL https://raw.githubusercontent.com/wp-cli/scaffold-command/main/templates/install-wp-tests.sh > bin/install-wp-tests.sh
+chmod +x bin/install-wp-tests.sh
+```
+
 ---
 
 ## Expected directory structure
@@ -254,6 +267,8 @@ plugin-name/
 │   ├── workflows/
 │   │   └── tests.yml
 │   └── dependabot.yml
+├── bin/
+│   └── install-wp-tests.sh
 ├── plugin-name.php          # Main plugin file
 ├── composer.json
 ├── pint.json
