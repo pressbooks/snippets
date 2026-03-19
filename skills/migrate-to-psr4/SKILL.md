@@ -46,9 +46,50 @@ Determine the new namespace structure based on plugin name.
 5. Update composer.json autoload
 6. Update main plugin file imports
 7. Run `lando composer dump-autoload`
-8. Run `lando composer standards` to lint
-9. Run `lando composer test` to run tests
-10. Delete old `inc/` directory
+8. **Review PHPDoc preservation** (see warning below)
+9. Run `lando composer standards` to lint
+10. Run `lando composer test` to run tests
+11. Delete old `inc/` directory
+
+### ⚠️ PHPDoc Warning
+
+Laravel Pint will remove PHPDoc comments that it considers redundant. This includes:
+
+- `@var` annotations on typed properties (redundant with PHP 7.4+ typed properties)
+- `@param` annotations when type is already in signature
+- `@return` annotations when return type is declared
+- **BUT ALSO** any descriptions in those PHPDoc blocks
+
+**Before running Pint**, check for meaningful PHPDoc descriptions that should be preserved:
+
+```bash
+grep -r "@var\|@param\|@return" src/ | grep -v "^[^:]*:[^:]*:$"
+```
+
+**If meaningful descriptions exist**, either:
+
+1. Add typed properties before running Pint (Pint will preserve descriptions on typed code)
+2. Or manually restore descriptions after Pint runs
+
+Example of what gets stripped:
+
+```php
+// Before Pint (with description)
+/**
+ * The role that is allowed to handle this plugin
+ *
+ * @var string
+ */
+private $minimumRole = 'manage_sites';
+
+// After Pint (description lost)
+private string $minimumRole = 'manage_sites';
+```
+
+**Pint will NOT strip:**
+- Class-level PHPDoc with descriptions
+- Method-level PHPDoc with descriptions (if method has complex logic)
+- `@see`, `@link`, `@throws`, `@deprecated` annotations
 
 ## Reference: Before/After Examples
 
@@ -164,8 +205,10 @@ add_action('plugins_loaded', [PluginsConfig::class, 'init']);
 - [ ] Remove `register_class_path()` calls from main plugin file
 - [ ] Update main plugin file imports
 - [ ] Run `lando composer dump-autoload`
+- [ ] **Review meaningful PHPDoc descriptions before running Pint**
 - [ ] Run `lando composer standards` to lint
 - [ ] Run `lando composer test` to verify nothing broke
+- [ ] **Restore any lost PHPDoc descriptions if needed**
 - [ ] Delete old `inc/` directory
 - [ ] Commit changes
 
@@ -173,6 +216,7 @@ add_action('plugins_loaded', [PluginsConfig::class, 'init']);
 
 - Never skip running `lando composer dump-autoload` after namespace changes
 - Always run `lando composer standards` for lint, `lando composer test` for tests
+- **Check for meaningful PHPDoc descriptions before running Pint** — it will strip annotations it considers redundant
 - Update all references to old class names (search for old namespace)
 - Test thoroughly before deleting old `inc/` directory
 - If plugin has tests, update test namespaces too

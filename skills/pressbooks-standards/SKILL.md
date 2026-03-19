@@ -126,6 +126,9 @@ Generate missing configs from templates, create `tests/` directory with required
 }
 ```
 
+⚠️ **PHPDoc Warning:** Pint will remove `@var`, `@param`, `@return` annotations it considers redundant (when types are already in code signatures). Any descriptions in those blocks will also be lost. Review meaningful PHPDoc before running `composer fix`.
+```
+
 ## Reference: phpunit.xml
 
 ```xml
