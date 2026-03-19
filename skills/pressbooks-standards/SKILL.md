@@ -104,7 +104,13 @@ lando composer test
 
 ### Step 6: Fix
 
-Generate missing configs from templates, create `tests/` directory with required files, update composer.json, run `lando composer fix` if user confirms.
+Generate missing configs from templates, create `tests/` directory with required files, update composer.json.
+
+**After creating new files, always run:**
+```bash
+lando composer standards  # Check lint
+lando composer fix        # Auto-fix if needed
+```
 
 **After updating composer.json dependencies, always run:**
 ```bash
