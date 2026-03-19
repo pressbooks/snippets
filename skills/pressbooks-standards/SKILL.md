@@ -106,6 +106,12 @@ lando composer test
 
 Generate missing configs from templates, create `tests/` directory with required files, update composer.json, run `lando composer fix` if user confirms.
 
+**After updating composer.json dependencies, always run:**
+```bash
+lando composer update --lock
+```
+This updates `composer.lock` to reflect the changes. CI will fail if the lock file is out of sync.
+
 ---
 
 ## Reference: pint.json
