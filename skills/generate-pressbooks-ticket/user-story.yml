@@ -1,0 +1,70 @@
+name: User Story
+description: Create a user story with acceptance criteria
+title: "[Story]: "
+labels: ["user-story"]
+body:
+  - type: input
+    id: user-type
+    attributes:
+      label: As a
+      description: Type of user
+      placeholder: "e.g., content creator, administrator, API consumer"
+    validations:
+      required: true
+
+  - type: input
+    id: want
+    attributes:
+      label: I want
+      description: Capability or feature
+      placeholder: "e.g., to export my content as EPUB"
+    validations:
+      required: true
+
+  - type: input
+    id: so-that
+    attributes:
+      label: So that
+      description: Benefit or value
+      placeholder: "e.g., I can distribute my book to e-readers"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why this matters, current pain point, or relevant background
+      placeholder: "Describe the problem this solves or the opportunity it addresses..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Specific, testable outcomes that must be met
+      value: |
+        - [ ] 
+        - [ ] 
+        - [ ] 
+    validations:
+      required: true
+
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of Scope
+      description: What is explicitly NOT included in this story
+      placeholder: "List items that are out of scope to prevent scope creep..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Technical notes, designs/mockups, dependencies, testing considerations, or anything else relevant
+      placeholder: "Implementation notes, links to designs, dependencies on other teams/stories, edge cases to test..."
+    validations:
+      required: false
