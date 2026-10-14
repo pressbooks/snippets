@@ -47,9 +47,11 @@ Determine the new namespace structure based on plugin name.
 6. Update main plugin file imports
 7. Run `lando composer dump-autoload`
 8. **Review PHPDoc preservation** (see warning below)
-9. Run `lando composer standards` to lint
-10. Run `lando composer test` to run tests
-11. Delete old `inc/` directory
+9. **Keep the Composer autoloader self-contained** (see warning below)
+10. **Check for translation calls that run before `init`** (see warning below)
+11. Run `lando composer standards` to lint
+12. Run `lando composer test` to run tests
+13. Delete old `inc/` directory
 
 ### ⚠️ PHPDoc Warning
 
@@ -90,6 +92,80 @@ private string $minimumRole = 'manage_sites';
 - Class-level PHPDoc with descriptions
 - Method-level PHPDoc with descriptions (if method has complex logic)
 - `@see`, `@link`, `@throws`, `@deprecated` annotations
+
+### ⚠️ Composer Autoloader Warning
+
+Many of these plugins (`Release Asset: true` in the plugin header) are distributed as a **standalone** GitHub release zip, installed directly on networks that have no relation to any monorepo or parent project. That means the plugin **cannot** rely on a host project's root Composer autoloader to resolve its own PSR-4 classes — it must always be able to bootstrap itself.
+
+When migrating off `register_class_path()` / HM Autoloader, **keep (or restore) an unconditional require of the plugin's own `vendor/autoload.php`** in the main plugin file:
+
+```php
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+} else {
+    $title = __('Dependencies Missing', 'plugin-text-domain');
+    $body = __('Please run <code>composer install</code> from the root of the plugin directory.', 'plugin-text-domain');
+    wp_die("<h1>{$title}</h1><p>{$body}</p>", $title);
+}
+```
+
+**Do not** gate this behind `class_exists('\SomeThirdPartyLib')` (a legacy pattern seen in sibling SSO plugins) — that incorrectly skips loading the plugin's *own* PSR-4 classes whenever another plugin happens to have already loaded the same third-party dependency. Composer's generated autoloader is safe to require unconditionally; it guards against double registration internally.
+
+**Do not** remove this require entirely to "rely on the global/root composer installation" — that was tried in a real migration (pressbooks-cas-sso PR #229) and caused `Fatal error: Uncaught TypeError: ... class "\Namespace\ClassName" not found` the moment the plugin's code diverged even slightly from whatever the host project's `composer.lock` happened to have installed.
+
+### ⚠️ Translation Timing Warning
+
+This migration pattern typically hooks a class's `init()` method directly to `plugins_loaded` (e.g. `add_action('plugins_loaded', [Admin::class, 'init'])`), which runs **before** WordPress's `init` action. Since WP 6.7, calling any translation function (`__()`, `_e()`, `esc_html__()`, `load_plugin_textdomain()`, etc.) before `init` triggers:
+
+```
+Notice: Function _load_textdomain_just_in_time was called incorrectly.
+Translation loading for the <domain> domain was triggered too early...
+```
+
+Audit every class wired to `plugins_loaded` for translation calls that run **eagerly** — inside `init()`, `hooks()`, or a constructor — rather than lazily inside a callback that only fires on a later hook (`init`, `admin_menu`, `network_admin_notices`, a render method, etc.):
+
+```bash
+grep -rn "__(\|_e(\|esc_html__(\|esc_attr__(\|load_plugin_textdomain(" src/
+```
+
+For each match, trace back to confirm it only executes from a hook that fires at/after `init`. Common fixes:
+
+```php
+// BAD — runs immediately when hooks() is called from plugins_loaded
+public static function hooks(Admin $obj)
+{
+    load_plugin_textdomain('plugin-text-domain', false, 'plugin-text-domain/languages/');
+    add_action('network_admin_menu', [$obj, 'addMenu']);
+}
+
+// GOOD — deferred to init
+public static function hooks(Admin $obj)
+{
+    add_action('init', function () {
+        load_plugin_textdomain('plugin-text-domain', false, 'plugin-text-domain/languages/');
+    });
+    add_action('network_admin_menu', [$obj, 'addMenu']);
+}
+```
+
+```php
+// BAD — __() evaluated in the constructor, called from plugins_loaded
+public function __construct(Admin $admin)
+{
+    $message = __('Not configured.', 'plugin-text-domain');
+    add_action('network_admin_notices', function () use ($message) {
+        echo $message;
+    });
+}
+
+// GOOD — __() evaluated inside the closure, which only runs on network_admin_notices
+public function __construct(Admin $admin)
+{
+    add_action('network_admin_notices', function () {
+        echo __('Not configured.', 'plugin-text-domain');
+    });
+}
+```
 
 ## Reference: Before/After Examples
 
@@ -180,6 +256,17 @@ add_action('plugins_loaded', ['\PressbooksConfig\Plugins_Config', 'init']);
 
 use Pressbooks\PluginsConfig\PluginsConfig;
 
+// Keep this — see the Composer Autoloader Warning above. Plugins that ship as a
+// standalone release zip cannot assume a host project's autoloader will resolve
+// their own PSR-4 classes.
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+} else {
+    $title = __('Dependencies Missing', 'plugin-text-domain');
+    $body = __('Please run <code>composer install</code> from the root of the plugin directory.', 'plugin-text-domain');
+    wp_die("<h1>{$title}</h1><p>{$body}</p>", $title);
+}
+
 add_action('plugins_loaded', [PluginsConfig::class, 'init']);
 ```
 
@@ -204,6 +291,8 @@ add_action('plugins_loaded', [PluginsConfig::class, 'init']);
 - [ ] Remove HM Autoloader dependency if present
 - [ ] Remove `register_class_path()` calls from main plugin file
 - [ ] Update main plugin file imports
+- [ ] **Keep (or restore) the unconditional `require_once __DIR__.'/vendor/autoload.php'` bootstrap in the main plugin file** — never delete it to "rely on a host project's autoloader"
+- [ ] **Audit every class hooked to `plugins_loaded` for translation calls (`__()`, `_e()`, `load_plugin_textdomain()`) that run eagerly** — defer them to `init` or later (see Translation Timing Warning)
 - [ ] Run `lando composer dump-autoload`
 - [ ] **Review meaningful PHPDoc descriptions before running Pint**
 - [ ] Run `lando composer standards` to lint
@@ -217,6 +306,9 @@ add_action('plugins_loaded', [PluginsConfig::class, 'init']);
 - Never skip running `lando composer dump-autoload` after namespace changes
 - Always run `lando composer standards` for lint, `lando composer test` for tests
 - **Check for meaningful PHPDoc descriptions before running Pint** — it will strip annotations it considers redundant
+- **Never remove the plugin's own `vendor/autoload.php` bootstrap** from the main plugin file. Plugins that ship as a standalone release zip must be able to load their own PSR-4 classes regardless of what (if anything) installed them — don't make this the one thing that silently breaks the moment the plugin's code and a host project's `composer.lock` drift apart
+- **Never gate the autoloader require behind `class_exists('\SomeThirdPartyLib')`** — only gate it on `file_exists(__DIR__.'/vendor/autoload.php')`
+- **Trace every class wired to `plugins_loaded` for translation calls that run before `init`** — WP 6.7+ will emit a `_doing_it_wrong` notice for any `__()`/`_e()`/`load_plugin_textdomain()` call reachable eagerly from that hook
 - Update all references to old class names (search for old namespace)
 - Test thoroughly before deleting old `inc/` directory
 - If plugin has tests, update test namespaces too
